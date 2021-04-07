@@ -1,0 +1,36 @@
+version: "3.1"
+
+services:
+  postgres:
+    image: postgres
+    restart: always
+    environment:
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - 5432:5432
+    volumes:
+      - ./pg_init.sql:/docker-entrypoint-initdb.d/init.sql
+
+  mariadb:
+    image: mariadb
+    build: ./mariadb
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_USER: test
+      MYSQL_PASSWORD: root
+      MYSQL_DATABASE: test
+    ports:
+      - 3306:3306
+
+  wait_for_postgres:
+    image: dadarek/wait-for-dependencies
+    depends_on:
+      - postgres
+    command: postgres:5432
+
+  wait_for_mariadb:
+    image: dadarek/wait-for-dependencies
+    depends_on:
+      - mariadb
+    command: mariadb:3306
